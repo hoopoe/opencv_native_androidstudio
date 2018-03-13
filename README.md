@@ -108,3 +108,8 @@ Here is how I made this project. If you simply want to run openCV with NDK suppo
   * [activity_main.xml](app/src/main/res/layout/activity_main.xml)
   * [native-lib.cpp](app/src/main/cpp/native-lib.cpp)
 
+
+* Useful
+  * install opencv apk to umulatore
+  ..Android\Sdk\platform-tools\adb install ..opencv-3.4.0-android-sdk\OpenCV-android-sdk\apk\OpenCV_3.4.0_Manager_3.40_x86.apk
+
