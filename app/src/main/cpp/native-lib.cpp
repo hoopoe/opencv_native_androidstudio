@@ -21,7 +21,13 @@ extern "C"
                                                                                jint nbrElem) {
         Mat &temp = *(Mat *) matAddrGray;
         dlib::cv_image<unsigned char> cimg(temp);
+        auto start = std::chrono::high_resolution_clock::now();
+
         std::vector<dlib::rectangle> dets = detector(cimg);
+
+        auto finish = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> elapsed = finish - start;
+        __android_log_print(ANDROID_LOG_INFO, "App", "Elapsed time: = %0.4f sec", elapsed.count());
 
         for(auto i : dets)
         {
@@ -30,9 +36,7 @@ extern "C"
             int width = i.width();
             int height = i.height();
             cv::Rect rect(x, y, width, height);
-            cv::rectangle(temp, rect, cv::Scalar(255));//0, 255, 0));
+            cv::rectangle(temp, rect, cv::Scalar(255));
         }
-
-        __android_log_print(ANDROID_LOG_INFO, "App", "Number of rectangles = %d", dets.size());
     }
 }
