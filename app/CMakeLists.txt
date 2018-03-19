@@ -75,3 +75,13 @@ target_link_libraries( # Specifies the target library.
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib} )
+
+
+
+
+add_definitions(-DANDROID)
+add_executable(face_landmark_detection_ex ../dlib/examples/face_landmark_detection_ex.cpp)
+target_link_libraries( face_landmark_detection_ex lib_dlib )
+
+add_executable(face_detection_ex ../dlib/examples/face_detection_ex.cpp)
+target_link_libraries( face_detection_ex lib_dlib )
