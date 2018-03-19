@@ -6,6 +6,7 @@
 
 #include <dlib/opencv.h>
 #include <dlib/image_processing/frontal_face_detector.h>
+#include <dlib/image_processing.h>
 
 #include <android/log.h>
 
@@ -19,25 +20,19 @@ extern "C"
                                                                                jlong matAddrGray,
                                                                                jint nbrElem) {
         Mat &temp = *(Mat *) matAddrGray;
+        dlib::cv_image<unsigned char> cimg(temp);
+        std::vector<dlib::rectangle> dets = detector(cimg);
 
-//        dlib::array2d<unsigned char> dlibImage;
-//        dlib::assign_image(dlibImage, dlib::cv_image<unsigned char>(temp));
-//        std::vector<dlib::rectangle> dets = detector(dlibImage);
-        //dlib::cv_image<unsigned char> cimg(temp);
+        for(auto i : dets)
+        {
+            int x = i.left();
+            int y = i.top();
+            int width = i.width();
+            int height = i.height();
+            cv::Rect rect(x, y, width, height);
+            cv::rectangle(temp, rect, cv::Scalar(255));//0, 255, 0));
+        }
 
-        //std::vector<dlib::rectangle> dets = detector(cimg);
-
-        int x = 0;
-        int y = 0;
-        int width = 100;
-        int height = 200;
-        cv::Rect rect(x, y, width, height);
-        cv::rectangle(temp, rect, cv::Scalar(255));//0, 255, 0));
-
-//        for (int k = 0; k < nbrElem; k++) {
-//            int i = rand() % mGr.cols;
-//            int j = rand() % mGr.rows;
-//            mGr.at<uchar>(j, i) = 255;
-//        }
+        __android_log_print(ANDROID_LOG_INFO, "App", "Number of rectangles = %d", dets.size());
     }
 }
