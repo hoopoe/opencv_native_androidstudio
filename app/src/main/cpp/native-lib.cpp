@@ -28,6 +28,7 @@ extern "C"
         auto finish = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = finish - start;
         __android_log_print(ANDROID_LOG_INFO, "App", "Elapsed time: = %0.4f sec", elapsed.count());
+        __android_log_print(ANDROID_LOG_INFO, "App", "Number of faces: = %d", dets.size());
 
         for(auto i : dets)
         {
