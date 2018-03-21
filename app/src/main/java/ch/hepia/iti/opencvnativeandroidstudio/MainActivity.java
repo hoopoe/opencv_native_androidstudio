@@ -3,6 +3,7 @@ package ch.hepia.iti.opencvnativeandroidstudio;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -15,6 +16,18 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
 
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Map;
+
+import static android.os.Environment.getExternalStorageDirectory;
+
 public class MainActivity extends AppCompatActivity implements CameraBridgeViewBase.CvCameraViewListener2 {
 
     private static final String TAG = "OCVSample::Activity";
@@ -26,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
             switch (status) {
                 case LoaderCallbackInterface.SUCCESS: {
                     Log.i(TAG, "OpenCV loaded successfully");
+
+
                     // Load ndk built module, as specified in moduleName in build.gradle
                     // after opencv initialization
                     System.loadLibrary("native-lib");
@@ -48,12 +63,16 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
         // Permissions for Android 6+
         ActivityCompat.requestPermissions(MainActivity.this,
-                new String[]{Manifest.permission.CAMERA},
+                new String[]{Manifest.permission.CAMERA,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE},
                 1);
 
         _cameraBridgeViewBase = (CameraBridgeViewBase) findViewById(R.id.main_surface);
         _cameraBridgeViewBase.setVisibility(SurfaceView.VISIBLE);
         _cameraBridgeViewBase.setCvCameraViewListener(this);
+
+
     }
 
     @Override
@@ -76,6 +95,13 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+//        for(int i = 0; i < permissions.length; i++){
+//            Log.d(TAG, permissions[i]);
+//        }
+//        for(int i = 0; i < grantResults.length; i++){
+//            Log.d(TAG, String.format("value = %d",grantResults[i]));
+//        }
+
         switch (requestCode) {
             case 1: {
                 // If request is cancelled, the result arrays are empty.
@@ -87,6 +113,12 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                     Toast.makeText(MainActivity.this, "Permission denied to read your External storage", Toast.LENGTH_SHORT).show();
+                }
+
+                if (grantResults.length > 1 && grantResults[2] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "I got permissions");
+                    Log.d(TAG, permissions[2]);
+                    loadResources();
                 }
                 return;
             }
@@ -114,9 +146,11 @@ public class MainActivity extends AppCompatActivity implements CameraBridgeViewB
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         Mat matGray = inputFrame.gray();
         salt(matGray.getNativeObjAddr(), 2000);
+        //loadResources();
         return matGray;
     }
 
     public native void salt(long matAddrGray, int nbrElem);
+    public native void loadResources();
 }
 

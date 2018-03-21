@@ -33,7 +33,13 @@ add_library( # Sets the name of the library.
              ../dlib/dlib/entropy_decoder/entropy_decoder_kernel_2.cpp
              ../dlib/dlib/base64/base64_kernel_1.cpp
              ../dlib/dlib/threads/threads_kernel_1.cpp
-             ../dlib/dlib/threads/threads_kernel_2.cpp )
+             ../dlib/dlib/threads/threads_kernel_2.cpp
+             ../dlib/dlib/threads/thread_pool_extension.cpp
+             ../dlib/dlib/threads/async.cpp
+             ../dlib/dlib/dnn/cpu_dlib.cpp
+             ../dlib/dlib/dnn/tensor_tools.cpp
+             )
+
 
 add_library( # Sets the name of the library.
              native-lib
