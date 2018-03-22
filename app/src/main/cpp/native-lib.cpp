@@ -4,6 +4,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
+
 #include <dlib/dnn.h>
 #include <dlib/opencv.h>
 #include <dlib/image_processing/frontal_face_detector.h>
@@ -48,6 +49,9 @@ using anet_type = dlib::loss_metric<dlib::fc_no_bias<128, dlib::avg_pool_everyth
 dlib::frontal_face_detector detector = dlib::get_frontal_face_detector();
 dlib::shape_predictor sp;
 anet_type net;
+matrix<float, 0, 1> first_face;
+matrix<float, 0, 1> second_face;
+bool resourceLoaded;
 
 extern "C"
 {
@@ -55,13 +59,19 @@ extern "C"
         __android_log_print(ANDROID_LOG_DEBUG, AppTag, "Load resources started");
         FILE* file = fopen("/storage/emulated/0/Movies/shape_predictor_5_face_landmarks.dat","r+");
         FILE* file2 = fopen("/storage/emulated/0/Movies/dlib_face_recognition_resnet_model_v1.dat","r+");
+        FILE* file3 = fopen("/storage/emulated/0/Movies/first_face_feature_vector.dat","r+");
+        FILE* file4 = fopen("/storage/emulated/0/Movies/second_face_feature_vector.dat","r+");
 
-        if (file != NULL && file2 != NULL)
+        if (file != NULL && file2 != NULL && file3 != NULL && file4 != NULL)
         {
             dlib::deserialize("/storage/emulated/0/Movies/shape_predictor_5_face_landmarks.dat") >> sp;
             dlib::deserialize("/storage/emulated/0/Movies/dlib_face_recognition_resnet_model_v1.dat") >> net;
+            dlib::deserialize("/storage/emulated/0/Movies/first_face_feature_vector.dat") >> first_face;
+            dlib::deserialize("/storage/emulated/0/Movies/second_face_feature_vector.dat") >> second_face;
+            resourceLoaded = true;
             __android_log_print(ANDROID_LOG_DEBUG, AppTag, "Resources found");
         } else{
+            resourceLoaded = false;
             __android_log_print(ANDROID_LOG_DEBUG, AppTag, "Resources NOT found");
         }
         __android_log_print(ANDROID_LOG_DEBUG, AppTag, "Load resources completed");
@@ -74,12 +84,10 @@ extern "C"
         std::vector<matrix<rgb_pixel>> faces;
         dlib::cv_image<unsigned char> cimg(temp);
         auto start = std::chrono::high_resolution_clock::now();
-
         std::vector<dlib::rectangle> dets = detector(cimg);
 
         for(auto face : dets)
         {
-            auto shape = sp(cimg, face);
             int x = face.left();
             int y = face.top();
             int width = face.width();
@@ -87,22 +95,32 @@ extern "C"
             cv::Rect rect(x, y, width, height);
             cv::rectangle(temp, rect, cv::Scalar(255));
 
-            matrix<rgb_pixel> face_chip;
-            extract_image_chip(cimg, get_face_chip_details(shape, 150, 0.25), face_chip);
-            faces.push_back(move(face_chip));
+            if (resourceLoaded) {
+                auto shape = sp(cimg, face);
+                matrix<rgb_pixel> face_chip;
+                extract_image_chip(cimg, get_face_chip_details(shape, 150, 0.25), face_chip);
+                faces.push_back(move(face_chip));
+            }
         }
 
-        std::vector<matrix<float, 0, 1>> face_descriptors = net(faces);
+        if (resourceLoaded) {
+            std::vector<matrix<float, 0, 1>> face_descriptors = net(faces);
+            for (size_t i = 0; i < face_descriptors.size(); ++i) {
+                float dist_first = length(face_descriptors[i] - first_face);
+                float dist_second = length(face_descriptors[i] - second_face);
+                if (dist_first < 0.6) {
+                    putText( temp, "First", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
+                } else if( dist_second < 0.6) {
+                    putText( temp, "Second", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
+                } else {
+                    putText( temp, "Unknown", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
+                }
+                //__android_log_print(ANDROID_LOG_INFO, AppTag, "Dist: = %0.2f ", dist_first);
+            }
+        }
 
         auto finish = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> elapsed = finish - start;
         __android_log_print(ANDROID_LOG_INFO, AppTag, "Elapsed time: = %0.2f sec", elapsed.count());
-//        __android_log_print(ANDROID_LOG_INFO, AppTag, "Number of faces: = %d", face_descriptors.size());
-//        for (size_t i = 0; i < face_descriptors.size(); ++i)
-//        {
-//            for (auto j : face_descriptors[i]) {
-//                __android_log_print(ANDROID_LOG_INFO, AppTag, "Desc: %f", j);
-//            }
-//        }
     }
 }
