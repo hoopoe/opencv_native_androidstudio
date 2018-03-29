@@ -4,11 +4,11 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/features2d/features2d.hpp>
 
-
 #include <dlib/dnn.h>
 #include <dlib/opencv.h>
 #include <dlib/image_processing/frontal_face_detector.h>
 #include <dlib/image_processing.h>
+#include <dlib/svm/svm_multiclass_linear_trainer.h>
 
 #include <android/log.h>
 
@@ -61,8 +61,10 @@ extern "C"
         FILE* file2 = fopen("/storage/emulated/0/Movies/dlib_face_recognition_resnet_model_v1.dat","r+");
         FILE* file3 = fopen("/storage/emulated/0/Movies/first_face_feature_vector.dat","r+");
         FILE* file4 = fopen("/storage/emulated/0/Movies/second_face_feature_vector.dat","r+");
+        FILE* file5 = fopen("/storage/emulated/0/Movies/faces_linear.svm","r+");
 
-        if (file != NULL && file2 != NULL && file3 != NULL && file4 != NULL)
+
+        if (file != NULL && file2 != NULL && file3 != NULL && file4 != NULL && file5 != NULL)
         {
             dlib::deserialize("/storage/emulated/0/Movies/shape_predictor_5_face_landmarks.dat") >> sp;
             dlib::deserialize("/storage/emulated/0/Movies/dlib_face_recognition_resnet_model_v1.dat") >> net;
