@@ -51,6 +51,11 @@ dlib::shape_predictor sp;
 anet_type net;
 matrix<float, 0, 1> first_face;
 matrix<float, 0, 1> second_face;
+
+typedef matrix<float, 0, 1> sample_type;
+typedef linear_kernel<sample_type> lin_kernel;
+multiclass_linear_decision_function<lin_kernel, string> df;
+
 bool resourceLoaded;
 
 extern "C"
@@ -63,13 +68,13 @@ extern "C"
         FILE* file4 = fopen("/storage/emulated/0/Movies/second_face_feature_vector.dat","r+");
         FILE* file5 = fopen("/storage/emulated/0/Movies/faces_linear.svm","r+");
 
-
         if (file != NULL && file2 != NULL && file3 != NULL && file4 != NULL && file5 != NULL)
         {
             dlib::deserialize("/storage/emulated/0/Movies/shape_predictor_5_face_landmarks.dat") >> sp;
             dlib::deserialize("/storage/emulated/0/Movies/dlib_face_recognition_resnet_model_v1.dat") >> net;
             dlib::deserialize("/storage/emulated/0/Movies/first_face_feature_vector.dat") >> first_face;
             dlib::deserialize("/storage/emulated/0/Movies/second_face_feature_vector.dat") >> second_face;
+            dlib::deserialize("/storage/emulated/0/Movies/faces_linear.svm") >> df;
             resourceLoaded = true;
             __android_log_print(ANDROID_LOG_DEBUG, AppTag, "Resources found");
         } else{
@@ -117,6 +122,7 @@ extern "C"
                 } else {
                     putText( temp, "Unknown", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
                 }
+                std::pair<string, float> res = df.predict(face_descriptors[i]);
                 //__android_log_print(ANDROID_LOG_INFO, AppTag, "Dist: = %0.2f ", dist_first);
             }
         }
