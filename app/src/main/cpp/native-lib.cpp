@@ -117,13 +117,14 @@ extern "C"
                 float dist_second = length(face_descriptors[i] - second_face);
                 if (dist_first < 0.6) {
                     putText( temp, "First", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
+                    std::pair<string, float> res = df.predict(face_descriptors[i]);
+                    __android_log_print(ANDROID_LOG_INFO, AppTag, "label: %s, prob: = %0.2f ",
+                                        res.first.c_str(), res.second);
                 } else if( dist_second < 0.6) {
                     putText( temp, "Second", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
                 } else {
                     putText( temp, "Unknown", Point2f(100,100), FONT_HERSHEY_PLAIN, 2,  Scalar(255));
                 }
-                std::pair<string, float> res = df.predict(face_descriptors[i]);
-                //__android_log_print(ANDROID_LOG_INFO, AppTag, "Dist: = %0.2f ", dist_first);
             }
         }
 
